@@ -1,0 +1,76 @@
+version: 1
+
+fields:
+  required: ["type", "slug", "title"]
+  optional: ["description", "date", "tags", "draft"]
+  defaults:
+    draft: false
+
+fm_schema:
+  date: string
+  tags: string[]
+  draft: boolean
+
+types:
+  home:
+    template: "home.html"
+    permalink: "/"
+    include_in:
+      sitemap: true
+      search: false
+  post:
+    template: "post.html"
+    permalink: "/{{ slug }}/"
+    include_in:
+      sitemap: true
+      search: true
+
+collections:
+  home_posts:
+    kind: "filter"
+    materialize: false
+    where:
+      all:
+        - fm_eq: { key: "draft", value: false }
+        - type_in: ["post"]
+    sort:
+      by: "fm.date"
+      dir: "desc"
+      nulls_last: true
+    limit: 100
+
+sitemap:
+  include_types: ["home", "post"]
+  exclude_drafts: true
+
+search:
+  include_types: ["post"]
+  exclude_drafts: true
+  fields_boost:
+    title: 3
+    description: 2
+    body: 1
+  preview:
+    from: "description"
+    max_len: 180
+
+artifacts:
+  collections:
+    enabled: false
+    dir: "collections"
+
+validation:
+  single_page_of_type:
+    home: 1
+  duplicate_route:
+    action: "error"
+  unknown_type:
+    action: "error"
+  unique_slug:
+    action: "error"
+  permalink_requires_slug:
+    action: "error"
+  missing_template:
+    action: "error"
+  materialize_requires_limit: true
+  materialize_group_by_requires_item_limit: true

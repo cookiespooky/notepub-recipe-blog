@@ -1,0 +1,24 @@
+<section class="hero">
+  <p class="eyebrow">Blog</p>
+  <h1>{{ .Page.Title }}</h1>
+  {{- if .Page.Description }}
+  <p class="deck">{{ .Page.Description }}</p>
+  {{- end }}
+</section>
+
+<section class="post-list">
+  {{- $items := .Collections.home_posts.Items }}
+  {{- if $items }}
+    {{- range $items }}
+    <article class="post-card">
+      <p class="post-meta">{{ index .FM "date" }}</p>
+      <h2><a href="{{ $.BaseURL }}{{ .Path }}">{{ .Title }}</a></h2>
+      {{- if .Description }}
+      <p>{{ .Description }}</p>
+      {{- end }}
+    </article>
+    {{- end }}
+  {{- else }}
+    <p class="empty">No posts yet.</p>
+  {{- end }}
+</section>

@@ -1,0 +1,25 @@
+site:
+  id: default
+  # Replace USERNAME/REPO with your GitHub Pages URL (must end with /)
+  base_url: "https://USERNAME.github.io/REPO/"
+  title: "My Blog"
+  description: "A minimal blog built with Notepub."
+content:
+  source: "local"
+  local_dir: "./content"
+paths:
+  file_root: ./.notepub
+  artifacts_dir: ./.notepub/artifacts
+  snapshot_file: ./.notepub/snapshot/objects.json
+  cache_root: ./.notepub/cache
+theme:
+  dir: "."
+  name: "theme"
+  templates_subdir: "templates"
+  assets_subdir: "assets"
+rules_path: "./rules.yaml"
+server:
+  listen: "127.0.0.1:8080"
+cache:
+  html_ttl_seconds: 600
+  stale_if_error_seconds: 604800

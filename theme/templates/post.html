@@ -1,0 +1,21 @@
+<article class="post">
+  <p class="post-meta">{{ index .FM "date" }}</p>
+  <h1>{{ .Page.Title }}</h1>
+  {{- if .Page.Description }}
+  <p class="deck">{{ .Page.Description }}</p>
+  {{- end }}
+  <div class="post-body">
+    {{ .Body }}
+  </div>
+  {{- $tags := index .FM "tags" }}
+  {{- if $tags }}
+  <div class="tag-row">
+    <span class="tag-label">Tags</span>
+    <ul class="tags">
+      {{- range $tags }}
+      <li>#{{ . }}</li>
+      {{- end }}
+    </ul>
+  </div>
+  {{- end }}
+</article>

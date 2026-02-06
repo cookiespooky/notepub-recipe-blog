@@ -1,0 +1,9 @@
+<article class="page">
+  <h1>{{ .Page.Title }}</h1>
+  {{- if .Page.Description }}
+  <p class="deck">{{ .Page.Description }}</p>
+  {{- end }}
+  <div class="post-body">
+    {{ .Body }}
+  </div>
+</article>

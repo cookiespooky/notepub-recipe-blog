@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <link rel="stylesheet" href="{{ .AssetsBase }}/styles.css" />
+  {{- if .Page.Description }}
+  <meta name="description" content="{{ .Page.Description }}" />
+  {{- end }}
+  {{- if .Meta.Robots }}
+  <meta name="robots" content="{{ .Meta.Robots }}" />
+  {{- end }}
+  {{- if .Canonical }}
+  <link rel="canonical" href="{{ .Canonical }}" />
+  {{- end }}
+  {{- range .Meta.OpenGraph }}
+  <meta property="{{ .Key }}" content="{{ .Value }}" />
+  {{- end }}
+  {{- if .Meta.JSONLD }}
+  <script type="application/ld+json">{{ .Meta.JSONLD }}</script>
+  {{- end }}
+  <title>{{ .Title }}</title>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ .BaseURL }}">Minimal Blog</a>
+      <nav class="nav">
+        <a href="{{ .BaseURL }}">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {{ .Body }}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Built with Notepub.</p>
+    </div>
+  </footer>
+</body>
+</html>
