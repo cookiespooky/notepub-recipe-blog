@@ -1,4 +1,4 @@
-# Notepub Blog Recipe
+# Notepub Blog Recipe 
 
 A minimal blog template for Notepub. Add Markdown, push to `main`, and GitHub Pages publishes your site.
 
