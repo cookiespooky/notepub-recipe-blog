@@ -50,6 +50,8 @@ For `s3`, workflow creates an effective S3 config at runtime.
 `base_url` is auto-set in CI for GitHub Pages. Local `config.yaml` can stay at `http://127.0.0.1:8080/`.
 
 ## Build locally
+Recommended pinned engine version: `v0.1.3`
+
 Use the build script:
 
 ```bash
