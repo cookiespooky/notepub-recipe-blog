@@ -17,7 +17,9 @@ find "$ROOT_DIR" -type f -name '*.md' -print0 | while IFS= read -r -d '' file; d
       my $alt = defined($2) ? $2 : "";
       $alt =~ s/^\s+|\s+$//g;
       $alt = "" if $alt =~ /^\d+(?:x\d+)?$/;
-      "![$alt]($path)"
+      $path =~ s{^\./}{};
+      $path =~ s{^/+}{};
+      "![$alt](/media/$path)"
     }egi;
   ' "$file"
 done

@@ -161,8 +161,10 @@ jobs:
             BASE_URL="https://${OWNER}.github.io/${REPO}/"
           fi
           CFG="${BUILD_CONFIG:-./config.yaml}"
+          MEDIA_BASE_URL="${BASE_URL}media/"
           echo "Using BASE_URL=$BASE_URL in $CFG"
           sed -i "s|base_url: \".*\"|base_url: \"${BASE_URL}\"|" "$CFG"
+          sed -i "s|media_base_url: \".*\"|media_base_url: \"${MEDIA_BASE_URL}\"|" "$CFG"
 
       - name: Build site
         env:
