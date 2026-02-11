@@ -42,4 +42,14 @@ if [[ -f "$OUT/robots.txt" ]]; then
   rm -f "$OUT/robots.txt.tmp"
 fi
 
-echo "[4/4] done -> $OUT"
+echo "[4/5] export content media for static hosting"
+rm -rf "$OUT/media"
+mkdir -p "$OUT/media"
+rsync -a --prune-empty-dirs \
+  --exclude '.git/' \
+  --exclude '.github/' \
+  --exclude '.obsidian/' \
+  --exclude '*.md' \
+  ./content/ "$OUT/media/"
+
+echo "[5/5] done -> $OUT"
