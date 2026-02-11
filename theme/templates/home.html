@@ -1,0 +1,70 @@
+<div class="prose home-prose">
+  {{ .Body }}
+</div>
+
+<section class="grid grid-favorites">
+  {{- $favorites := .Collections.home_favorites.Items }}
+  {{- if $favorites }}
+  {{- range $favorites }}
+  <article class="card favorite-card">
+    <a class="favorite-link" href="{{ $.BaseURL }}{{ .Path }}">
+      {{- if .FM.image }}
+      <img class="favorite-image" src="{{ .FM.image }}" alt="{{ .Title }}">
+      {{- else }}
+      <img class="favorite-image" src="{{ $.AssetsBase }}/placeholder.svg" alt="">
+      {{- end }}
+      <div class="favorite-body">
+        <h3>{{ .Title }}</h3>
+        {{- if .Description }}
+        <p class="muted">{{ .Description }}</p>
+        {{- end }}
+      </div>
+    </a>
+  </article>
+  {{- end }}
+  {{- else }}
+  <p class="muted">No featured items yet.</p>
+  {{- end }}
+</section>
+
+<section class="section blog">
+  <div class="blog-header">
+    <h2>Blog</h2>
+    {{- $hubs := .Collections.home_hubs.Items }}
+    {{- if $hubs }}
+    <div class="hub-filters" data-hub-filters>
+      <button class="hub-pill is-active" type="button" data-hub="all" data-hub-title="Blog" data-hub-description="Latest posts across all hubs.">All</button>
+      {{- range $hubs }}
+      <button class="hub-pill" type="button" data-hub="{{ .Slug }}" data-hub-title="{{ .Title }}" data-hub-description="{{ .Description }}">{{ .Title }}</button>
+      {{- end }}
+    </div>
+    {{- end }}
+    <div class="hub-meta">
+      <h3 data-blog-title>Latest posts across all hubs</h3>
+      <p class="muted" data-blog-description>Select a hub to filter articles.</p>
+    </div>
+  </div>
+
+  {{- $articles := .Collections.home_articles.Items }}
+  {{- if $articles }}
+  <div class="grid blog-grid">
+    {{- range $articles }}
+    <article class="card blog-card" data-article-card data-hubs="{{- range $i, $hub := .FM.hub -}}{{- if $i }} {{ end -}}{{- $hub -}}{{- end -}}">
+      <a class="blog-link" href="{{ $.BaseURL }}{{ .Path }}">
+        {{- if .FM.image }}
+        <img class="blog-image" src="{{ .FM.image }}" alt="{{ .Title }}">
+        {{- else }}
+        <img class="blog-image" src="{{ $.AssetsBase }}/placeholder.svg" alt="">
+        {{- end }}
+        <div class="blog-body">
+          <h3>{{ .Title }}</h3>
+          {{- if .Description }}<p class="muted">{{ .Description }}</p>{{- end }}
+        </div>
+      </a>
+    </article>
+    {{- end }}
+  </div>
+  {{- else }}
+  <p class="muted">No articles yet.</p>
+  {{- end }}
+</section>

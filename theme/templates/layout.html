@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  {{- $isHome := eq .Page.Type "home" -}}
+  {{- $pageURL := .Canonical -}}
+  {{- if not $pageURL }}{{- $pageURL = printf "%s/" .BaseURL -}}{{- end -}}
+  {{- $siteName := "Demo Blog" -}}
+  {{- $ogImage := printf "%s/assets/notepub.svg" .BaseURL -}}
+  {{- $hasOGImage := false -}}
+  {{- range .Meta.OpenGraph -}}
+    {{- if eq .Key "og:image" -}}
+      {{- $ogImage = .Value -}}
+      {{- $hasOGImage = true -}}
+    {{- end -}}
+  {{- end -}}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" type="image/svg+xml" href="{{ .AssetsBase }}/notepub.svg" />
+  <link rel="stylesheet" href="{{ .AssetsBase }}/styles.css" />
+  {{- if .Page.Description }}
+  <meta name="description" content="{{ .Page.Description }}" />
+  {{- end }}
+  {{- if .Meta.Robots }}
+  <meta name="robots" content="{{ .Meta.Robots }}" />
+  {{- end }}
+  {{- if .Canonical }}
+  <link rel="canonical" href="{{ .Canonical }}" />
+  {{- end }}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ .Title }}" />
+  {{- if .Page.Description }}
+  <meta name="twitter:description" content="{{ .Page.Description }}" />
+  {{- end }}
+  <meta name="twitter:image" content="{{ $ogImage }}" />
+  {{- range .Meta.OpenGraph }}
+  <meta property="{{ .Key }}" content="{{ .Value }}" />
+  {{- end }}
+  <meta property="og:site_name" content="{{ $siteName }}" />
+  {{- if not $hasOGImage }}
+  <meta property="og:image" content="{{ $ogImage }}" />
+  {{- end }}
+  {{- if .Meta.JSONLD }}
+  <script type="application/ld+json">{{ .Meta.JSONLD }}</script>
+  {{- else }}
+  {{- $isArticle := eq .Page.Type "article" -}}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "{{ .BaseURL }}/#website",
+        "url": "{{ .BaseURL }}/",
+        "name": "{{ $siteName }}",
+        "inLanguage": "en"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "{{ $pageURL }}#webpage",
+        "url": "{{ $pageURL }}",
+        "name": "{{ .Title }}",
+        "description": "{{ .Page.Description }}",
+        "isPartOf": { "@id": "{{ .BaseURL }}/#website" },
+        "inLanguage": "en"
+      }
+      {{- if $isArticle -}},
+      {
+        "@type": "BlogPosting",
+        "headline": "{{ .Title }}",
+        "description": "{{ .Page.Description }}",
+        "mainEntityOfPage": { "@id": "{{ $pageURL }}#webpage" },
+        "inLanguage": "en"
+      }
+      {{- end -}}
+    ]
+  }
+  </script>
+  {{- end }}
+  {{- if not $isHome }}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "{{ .BaseURL }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "{{ .Title }}",
+        "item": "{{ $pageURL }}"
+      }
+    ]
+  }
+  </script>
+  {{- end }}
+  <script>
+    window.__notepubSearchMode = "{{ .SearchMode }}";
+    window.__notepubBaseURL = "{{ .BaseURL }}";
+  </script>
+  <title>{{ .Title }}</title>
+</head>
+<body>
+  {{ template "header.html" . }}
+
+  <aside class="mobile-nav" data-nav-panel aria-hidden="true">
+    <div class="mobile-nav-inner">
+      <div class="mobile-nav-header">
+        <span>Navigation</span>
+      </div>
+      <nav class="mobile-nav-links">
+        <a href="{{ .BaseURL }}/">Home</a>
+        <a href="{{ .BaseURL }}/content-architecture">Content Architecture</a>
+        <a href="{{ .BaseURL }}/workflow-practices">Workflow Practices</a>
+        <a href="{{ .BaseURL }}/search">Search</a>
+      </nav>
+      <div class="mobile-nav-footer"></div>
+    </div>
+    <div class="mobile-nav-backdrop" data-nav-close></div>
+  </aside>
+  <main class="container">
+    {{ .Body }}
+  </main>
+  {{ template "footer.html" . }}
+
+  <div class="search-modal" data-search-modal aria-hidden="true">
+    <div class="search-backdrop" data-search-close></div>
+    <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search">
+      <form class="search-form" action="{{ .BaseURL }}/search" method="get">
+        <input type="search" name="q" placeholder="Search..." minlength="2" data-search-input />
+        <button type="submit">Search</button>
+        <button type="button" class="ghost" data-search-close>Close</button>
+      </form>
+      <div class="search-results" data-search-results></div>
+    </div>
+  </div>
+  <script src="{{ .AssetsBase }}/main.js"></script>
+</body>
+</html>

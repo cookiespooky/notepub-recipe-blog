@@ -1,0 +1,35 @@
+<section class="page">
+  <p class="eyebrow">Search</p>
+  <h1>Search</h1>
+  <form class="search-form" action="{{ .BaseURL }}/search" method="get" data-search-page-form>
+    <input type="search" name="q" value="{{ .SearchQuery }}" placeholder="Search..." minlength="2" data-search-page-input />
+    <button type="submit">Search</button>
+  </form>
+  <div class="search-results" data-search-page-results>
+    {{- if .SearchItems }}
+    <ul>
+      {{- range .SearchItems }}
+      <li>
+        <a href="{{ $.BaseURL }}{{ .Path }}">{{ .Title }}</a>
+        {{- if .Snippet }}<p class="muted">{{ .Snippet }}</p>{{- end }}
+      </li>
+      {{- end }}
+    </ul>
+    {{- else }}
+    <p class="muted">Type at least 2 characters.</p>
+    {{- end }}
+  </div>
+  <noscript>
+    <p class="muted">JavaScript enhances search but is optional.</p>
+  </noscript>
+</section>
+<script>
+  (function() {
+    if (window.__npPersonalSearchPageLoader) return;
+    window.__npPersonalSearchPageLoader = true;
+    var s = document.createElement('script');
+    s.src = '{{ .AssetsBase }}/search-page.js';
+    s.async = true;
+    document.body.appendChild(s);
+  })();
+</script>

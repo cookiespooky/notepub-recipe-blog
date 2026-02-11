@@ -1,0 +1,14 @@
+# Demo Blog
+
+Template content site for documentation and blog-style pages.
+
+Base URL:
+- https://example.com/
+
+Preferred machine-readable source:
+- https://example.com/llms-full.txt
+
+Entry points:
+- Home: https://example.com/
+- Search index: https://example.com/search.json
+- Sitemap: https://example.com/sitemap.xml

@@ -1,0 +1,198 @@
+name: Deploy Personal Portal to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  repository_dispatch:
+    types: [content-updated]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NOTEPUB_VERSION: v0.1.1
+      NOTEPUB_BIN: ./notepub
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve content source config
+        id: source
+        env:
+          SOURCE_RAW: ${{ vars.CONTENT_SOURCE }}
+          CONTENT_REPO_RAW: ${{ vars.CONTENT_REPO }}
+          CONTENT_REF_RAW: ${{ vars.CONTENT_REF }}
+        run: |
+          SOURCE="${SOURCE_RAW:-local}"
+          case "$SOURCE" in
+            local|content_repo|s3) ;;
+            *)
+              echo "Unsupported CONTENT_SOURCE: $SOURCE"
+              echo "Allowed values: local, content_repo, s3"
+              exit 1
+              ;;
+          esac
+
+          CONTENT_REPO="${CONTENT_REPO_RAW:-}"
+          CONTENT_REF="${CONTENT_REF_RAW:-main}"
+
+          if [ "$SOURCE" = "content_repo" ] && [ -z "$CONTENT_REPO" ]; then
+            echo "CONTENT_SOURCE=content_repo requires vars.CONTENT_REPO (owner/repo)"
+            exit 1
+          fi
+
+          echo "content_source=$SOURCE" >> "$GITHUB_OUTPUT"
+          echo "content_repo=$CONTENT_REPO" >> "$GITHUB_OUTPUT"
+          echo "content_ref=$CONTENT_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout content repository
+        if: steps.source.outputs.content_source == 'content_repo'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.source.outputs.content_repo }}
+          ref: ${{ steps.source.outputs.content_ref }}
+          path: .external-content
+
+      - name: Sync external content into site content/
+        if: steps.source.outputs.content_source == 'content_repo'
+        run: |
+          # Keep only required system pages in site repo.
+          # User content comes from external content repo.
+          find ./content -type f -name '*.md' ! -path './content/search.md' -delete
+
+          rsync -a \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.obsidian/' \
+            --exclude 'README.md' \
+            --exclude 'LICENSE' \
+            --exclude '.gitignore' \
+            --exclude '.gitattributes' \
+            ./.external-content/ ./content/
+
+      - name: Prepare S3 config override
+        if: steps.source.outputs.content_source == 's3'
+        env:
+          S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
+          S3_REGION: ${{ vars.S3_REGION }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          S3_PREFIX: ${{ vars.S3_PREFIX }}
+          S3_USE_PATH_STYLE: ${{ vars.S3_USE_PATH_STYLE }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: |
+          if [ -z "${S3_ENDPOINT:-}" ] || [ -z "${S3_REGION:-}" ] || [ -z "${S3_BUCKET:-}" ]; then
+            echo "S3 mode requires vars.S3_ENDPOINT, vars.S3_REGION, vars.S3_BUCKET"
+            exit 1
+          fi
+          if [ -z "${S3_ACCESS_KEY:-}" ] || [ -z "${S3_SECRET_KEY:-}" ]; then
+            echo "S3 mode requires secrets.S3_ACCESS_KEY and secrets.S3_SECRET_KEY"
+            exit 1
+          fi
+
+          PREFIX="${S3_PREFIX:-content}"
+          USE_PATH_STYLE="${S3_USE_PATH_STYLE:-true}"
+
+          awk -v endpoint="$S3_ENDPOINT" \
+              -v region="$S3_REGION" \
+              -v bucket="$S3_BUCKET" \
+              -v prefix="$PREFIX" \
+              -v key="$S3_ACCESS_KEY" \
+              -v secret="$S3_SECRET_KEY" \
+              -v use_path_style="$USE_PATH_STYLE" '
+            BEGIN { skip=0 }
+            /^content:/ {
+              print "content:"
+              print "  source: \"s3\""
+              print "  s3:"
+              print "    endpoint: \"" endpoint "\""
+              print "    region: \"" region "\""
+              print "    bucket: \"" bucket "\""
+              print "    prefix: \"" prefix "\""
+              print "    access_key: \"" key "\""
+              print "    secret_key: \"" secret "\""
+              print "    use_path_style: " use_path_style
+              skip=1
+              next
+            }
+            skip && /^[A-Za-z_][A-Za-z0-9_]*:/ { skip=0 }
+            !skip { print }
+          ' config.yaml > config.effective.yaml
+
+      - name: Set effective build config
+        id: buildcfg
+        run: |
+          if [ "${{ steps.source.outputs.content_source }}" = "s3" ]; then
+            echo "path=./config.effective.yaml" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=./config.yaml" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Normalize Obsidian image embeds
+        if: steps.source.outputs.content_source != 's3'
+        run: |
+          chmod +x ./scripts/normalize-obsidian-embeds.sh
+          ./scripts/normalize-obsidian-embeds.sh ./content
+
+      - name: Download notepub binary
+        run: |
+          curl -L -o notepub "https://github.com/cookiespooky/notepub/releases/download/${NOTEPUB_VERSION}/notepub_linux_amd64"
+          chmod +x notepub
+
+      - name: Prepare base_url for GitHub Pages
+        env:
+          BUILD_CONFIG: ${{ steps.buildcfg.outputs.path }}
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          if [ "$REPO" = "${OWNER}.github.io" ]; then
+            BASE_URL="https://${OWNER}.github.io/"
+          else
+            BASE_URL="https://${OWNER}.github.io/${REPO}/"
+          fi
+          CFG="${BUILD_CONFIG:-./config.yaml}"
+          echo "Using BASE_URL=$BASE_URL in $CFG"
+          sed -i "s|base_url: \".*\"|base_url: \"${BASE_URL}\"|" "$CFG"
+
+      - name: Build site
+        env:
+          NOTEPUB_CONFIG: ${{ steps.buildcfg.outputs.path }}
+        run: ./scripts/build.sh
+
+      - name: Export content media for static hosting
+        if: steps.source.outputs.content_source != 's3'
+        run: |
+          rm -rf ./dist/media
+          mkdir -p ./dist/media
+          rsync -a --prune-empty-dirs \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.obsidian/' \
+            --exclude '*.md' \
+            ./content/ ./dist/media/
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

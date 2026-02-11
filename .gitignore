@@ -1,0 +1,15 @@
+.DS_Store
+
+# Build outputs
+dist/
+artifacts/
+.notepub/
+
+# Local binaries and caches
+notepub
+*.log
+
+# Editor/system
+.idea/
+.vscode/
+*.swp

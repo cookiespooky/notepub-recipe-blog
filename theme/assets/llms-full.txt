@@ -1,0 +1,17 @@
+# Demo Blog - Full LLM Index
+
+## Purpose
+Neutral starter content for a template blog and knowledge site.
+
+## Source of truth
+- Markdown content in `content/`
+- Behavior rules in `rules.yaml`
+
+## Routes
+- Home: https://example.com/
+- Search page: https://example.com/search/
+
+## Discovery and indexing
+- Sitemap: https://example.com/sitemap.xml
+- Search JSON: https://example.com/search.json
+- LLM index: https://example.com/llms.txt
