@@ -17,7 +17,12 @@
       <article class="card blog-card">
         <a class="blog-link" href="{{ $.BaseURL }}{{ .Path }}">
           {{- if .FM.image }}
-          <img class="blog-image" src="{{ .FM.image }}" alt="{{ .Title }}">
+          {{- $img := .FM.image }}
+          {{- if eq (printf "%.1s" $img) "/" }}
+          <img class="blog-image" src="{{ $.BaseURL }}{{ $img }}" alt="{{ .Title }}">
+          {{- else }}
+          <img class="blog-image" src="{{ $img }}" alt="{{ .Title }}">
+          {{- end }}
           {{- else }}
           <img class="blog-image" src="{{ $.AssetsBase }}/placeholder.svg" alt="">
           {{- end }}

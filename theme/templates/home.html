@@ -9,7 +9,12 @@
   <article class="card favorite-card">
     <a class="favorite-link" href="{{ $.BaseURL }}{{ .Path }}">
       {{- if .FM.image }}
-      <img class="favorite-image" src="{{ .FM.image }}" alt="{{ .Title }}">
+      {{- $img := .FM.image }}
+      {{- if eq (printf "%.1s" $img) "/" }}
+      <img class="favorite-image" src="{{ $.BaseURL }}{{ $img }}" alt="{{ .Title }}">
+      {{- else }}
+      <img class="favorite-image" src="{{ $img }}" alt="{{ .Title }}">
+      {{- end }}
       {{- else }}
       <img class="favorite-image" src="{{ $.AssetsBase }}/placeholder.svg" alt="">
       {{- end }}
@@ -52,7 +57,12 @@
     <article class="card blog-card" data-article-card data-hubs="{{- range $i, $hub := .FM.hub -}}{{- if $i }} {{ end -}}{{- $hub -}}{{- end -}}">
       <a class="blog-link" href="{{ $.BaseURL }}{{ .Path }}">
         {{- if .FM.image }}
-        <img class="blog-image" src="{{ .FM.image }}" alt="{{ .Title }}">
+        {{- $img := .FM.image }}
+        {{- if eq (printf "%.1s" $img) "/" }}
+        <img class="blog-image" src="{{ $.BaseURL }}{{ $img }}" alt="{{ .Title }}">
+        {{- else }}
+        <img class="blog-image" src="{{ $img }}" alt="{{ .Title }}">
+        {{- end }}
         {{- else }}
         <img class="blog-image" src="{{ $.AssetsBase }}/placeholder.svg" alt="">
         {{- end }}
