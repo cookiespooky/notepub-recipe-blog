@@ -168,11 +168,25 @@
   var navOpen = document.querySelector('[data-nav-open]');
   var navCloseBtns = document.querySelectorAll('[data-nav-close]');
   var header = document.querySelector('.site-header');
+  var pageScrollY = 0;
+
+  function lockBodyScroll() {
+    pageScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.classList.add('nav-open');
+    document.body.style.top = (-pageScrollY) + 'px';
+  }
+
+  function unlockBodyScroll() {
+    document.body.classList.remove('nav-open');
+    document.body.style.top = '';
+    window.scrollTo(0, pageScrollY);
+  }
 
   function openNav() {
     if (!navPanel) return;
     navPanel.classList.add('is-open');
     navPanel.setAttribute('aria-hidden', 'false');
+    lockBodyScroll();
     if (navOpen) {
       navOpen.classList.add('is-open');
       navOpen.setAttribute('aria-label', 'Close navigation');
@@ -183,6 +197,7 @@
     if (!navPanel) return;
     navPanel.classList.remove('is-open');
     navPanel.setAttribute('aria-hidden', 'true');
+    unlockBodyScroll();
     if (navOpen) {
       navOpen.classList.remove('is-open');
       navOpen.setAttribute('aria-label', 'Open navigation');

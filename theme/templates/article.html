@@ -1,5 +1,4 @@
 <article class="page">
-  <p class="eyebrow">Article</p>
   <h1>{{ .Page.Title }}</h1>
   {{- if .Page.Description }}
   <p class="deck">{{ .Page.Description }}</p>
@@ -9,7 +8,14 @@
     {{- if $hubs }}
     <div class="tags">
       {{- range $hubs }}
-      <a class="tag" href="{{ $.BaseURL }}/{{ . }}">#{{ . }}</a>
+      {{- $hubSlug := . }}
+      {{- $hubTitle := . }}
+      {{- range $.Collections.home_hubs.Items }}
+        {{- if eq .Slug $hubSlug }}
+          {{- $hubTitle = .Title }}
+        {{- end }}
+      {{- end }}
+      <a class="tag" href="{{ $.BaseURL }}/{{ $hubSlug }}">#{{ $hubTitle }}</a>
       {{- end }}
     </div>
     {{- end }}

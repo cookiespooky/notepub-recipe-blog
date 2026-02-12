@@ -5,6 +5,8 @@ title: "About This Demo"
 description: "Neutral overview of the demo site structure and purpose."
 ---
 
+![[npcover.svg]]
+
 This page explains how the demo site is organized.
 
 ## What This Template Includes

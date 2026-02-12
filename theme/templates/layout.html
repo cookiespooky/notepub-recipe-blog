@@ -111,14 +111,11 @@
 
   <aside class="mobile-nav" data-nav-panel aria-hidden="true">
     <div class="mobile-nav-inner">
-      <div class="mobile-nav-header">
-        <span>Navigation</span>
-      </div>
       <nav class="mobile-nav-links">
         <a href="{{ .BaseURL }}/">Home</a>
-        <a href="{{ .BaseURL }}/content-architecture">Content Architecture</a>
-        <a href="{{ .BaseURL }}/workflow-practices">Workflow Practices</a>
-        <a href="{{ .BaseURL }}/search">Search</a>
+        {{- range .Collections.home_hubs.Items }}
+        <a href="{{ $.BaseURL }}/{{ .Slug }}">{{ .Title }}</a>
+        {{- end }}
       </nav>
       <div class="mobile-nav-footer"></div>
     </div>

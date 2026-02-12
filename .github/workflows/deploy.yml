@@ -138,7 +138,7 @@ jobs:
             echo "path=./config.yaml" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Normalize Obsidian image embeds
+      - name: Normalize Obsidian embeds and hub wikilinks
         if: steps.source.outputs.content_source != 's3'
         run: |
           chmod +x ./scripts/normalize-obsidian-embeds.sh
