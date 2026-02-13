@@ -9,7 +9,12 @@ artifacts/
 notepub
 *.log
 
+# Optional local env
+.env
+.env.*
+
 # Editor/system
 .idea/
 .vscode/
+.obsidian/
 *.swp
