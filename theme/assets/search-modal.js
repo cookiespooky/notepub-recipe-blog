@@ -219,6 +219,10 @@
       thumb.loading = 'lazy';
       thumb.decoding = 'async';
       thumb.src = resolveThumb(item);
+      thumb.onerror = function() {
+        thumb.onerror = null;
+        thumb.src = withBasePath('/assets/notepub.jpg');
+      };
 
       var body = document.createElement('div');
       body.className = 'np-search-item-body';
@@ -245,8 +249,8 @@
   }
 
   function resolveThumb(item) {
-    var thumb = item && (item.image || item.thumbnail) ? (item.image || item.thumbnail) : '/assets/placeholder.svg';
-    if (typeof thumb !== 'string') return withBasePath('/assets/placeholder.svg');
+    var thumb = item && (item.image || item.thumbnail) ? (item.image || item.thumbnail) : '/assets/notepub.jpg';
+    if (typeof thumb !== 'string') return withBasePath('/assets/notepub.jpg');
     if (/^https?:\/\//i.test(thumb)) return thumb;
     return withBasePath(thumb);
   }
