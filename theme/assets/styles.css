@@ -178,6 +178,7 @@ a:hover { text-decoration: underline; }
   font-size: 0.92rem;
   line-height: 1.35;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -586,7 +587,6 @@ a:hover { text-decoration: underline; }
 .home-prose {
   max-width: 700px;
   margin: 50px auto 30px;
-  text-align: center;
 }
 
 .home-prose p {
