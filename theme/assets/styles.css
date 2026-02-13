@@ -585,7 +585,6 @@ a:hover { text-decoration: underline; }
 }
 
 .home-prose {
-  max-width: 700px;
   margin: 50px auto 30px;
 }
 
@@ -598,9 +597,7 @@ a:hover { text-decoration: underline; }
 }
 
 .home-prose img:first-of-type {
-  max-width: 100px;
   height: auto;
-  border-radius: 100%;
 }
 
 .meta-row { display: flex; gap: 16px; align-items: center; margin-bottom: 2em; }
@@ -627,7 +624,7 @@ a:hover { text-decoration: underline; }
 
 .muted { color: var(--muted); }
 
-.site-footer { border-top: 1px solid var(--border); padding: 28px 0 40px; margin-top: 60px; }
+.site-footer { border-top: 1px solid var(--border); padding: 30px 0 30px; margin-top: 60px; }
 
 .footer-inner { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
 
