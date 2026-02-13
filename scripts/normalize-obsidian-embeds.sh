@@ -107,6 +107,7 @@ sub content_rel_dir {
 
 my @files = @ARGV;
 my %slug_by_name = ();
+my %slug_by_name_lc = ();
 my %title_by_name = ();
 my %content_by_file = ();
 
@@ -136,6 +137,8 @@ for my $file (@files) {
 
   $slug_by_name{$base} = $slug;
   $slug_by_name{"$base.md"} = $slug;
+  $slug_by_name_lc{lc($base)} = $slug;
+  $slug_by_name_lc{lc("$base.md")} = $slug;
   $title_by_name{$base} = $title;
   $title_by_name{"$base.md"} = $title;
   $title_by_name{$slug} = $title;
@@ -145,7 +148,7 @@ sub resolve_to_slug {
   my ($raw) = @_;
   my $target = wiki_target($raw);
   return $target if $target eq "";
-  return $slug_by_name{$target} // $target;
+  return $slug_by_name{$target} // $slug_by_name_lc{lc($target)} // $target;
 }
 
 sub parse_wikilink_parts {
@@ -168,7 +171,24 @@ sub title_for_target {
   return $slug;
 }
 
-sub normalize_hub_frontmatter {
+sub parse_inline_list {
+  my ($raw) = @_;
+  my $v = trim($raw);
+  return () if $v eq "";
+  if ($v =~ /^\[(.*)\]$/s && $v !~ /^\[\[.*\]\]$/s) {
+    my $inner = $1;
+    my @parts = split /,/, $inner;
+    my @vals = ();
+    for my $part (@parts) {
+      my $item = trim($part);
+      push @vals, $item if $item ne "";
+    }
+    return @vals;
+  }
+  return ();
+}
+
+sub normalize_link_fields_frontmatter {
   my ($fm) = @_;
   my @lines = split /\n/, $fm, -1;
   my @out = ();
@@ -177,26 +197,42 @@ sub normalize_hub_frontmatter {
   while ($i <= $#lines) {
     my $line = $lines[$i];
 
-    # hub scalar: hub: [[filename]] / hub: slug
-    if ($line =~ /^hub:\s*(\S.*)$/) {
-      my $norm = resolve_to_slug($1);
-      push @out, "hub:";
-      push @out, "  - \"$norm\"";
+    # scalar or inline list: hub|related
+    if ($line =~ /^(hub|related):\s*(\S.*)$/) {
+      my $field = $1;
+      my $raw = $2;
+      my @vals = parse_inline_list($raw);
+      if (@vals == 0) {
+        my $norm = resolve_to_slug($raw);
+        @vals = ($norm) if $norm ne "";
+      } else {
+        @vals = map { resolve_to_slug($_) } @vals;
+        @vals = grep { $_ ne "" } @vals;
+      }
+      push @out, "$field:";
+      for my $val (@vals) {
+        push @out, "  - \"$val\"";
+      }
       $i++;
       next;
     }
 
-    # hub list:
-    # hub:
+    # list:
+    # hub|related:
     #   - [[filename]]
     #   - slug
-    if ($line =~ /^hub:\s*$/) {
-      push @out, "hub:";
+    if ($line =~ /^(hub|related):\s*$/) {
+      my $field = $1;
+      my @vals = ();
       $i++;
       while ($i <= $#lines && $lines[$i] =~ /^[ \t]+-\s*(.*?)\s*$/) {
         my $norm = resolve_to_slug($1);
-        push @out, "  - \"$norm\"";
+        push @vals, $norm if $norm ne "";
         $i++;
+      }
+      push @out, "$field:";
+      for my $val (@vals) {
+        push @out, "  - \"$val\"";
       }
       next;
     }
@@ -233,11 +269,11 @@ sub to_fm_image_path {
 for my $file (@files) {
   my $text = $content_by_file{$file};
 
-  # Normalize Obsidian wikilinks in frontmatter hub field only.
+  # Normalize Obsidian wikilinks in frontmatter link fields.
   # Body wikilinks stay untouched.
   $text =~ s{\A---\r?\n([\s\S]*?)\r?\n---\r?\n}{
     my $fm = $1;
-    my $norm = normalize_hub_frontmatter($fm);
+    my $norm = normalize_link_fields_frontmatter($fm);
     "---\n$norm\n---\n";
   }eg;
 

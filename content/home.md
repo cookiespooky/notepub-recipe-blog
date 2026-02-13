@@ -5,7 +5,7 @@ title: "Demo Blog"
 description: "Example blog structure with hubs, articles, and cross-links."
 ---
 
-![[placeholder.svg]]
+![[npcover.svg]]
 
 # Demo Blog
 

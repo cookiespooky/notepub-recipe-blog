@@ -4,7 +4,7 @@ site:
   media_base_url: "http://127.0.0.1:8080/media/"
   title: "Demo Blog"
   description: "Template blog with hubs and linked articles."
-  default_og_image: "/assets/notepub.svg"
+  default_og_image: "/assets/notepub.png"
 content:
   source: "local"
   local_dir: "./content"

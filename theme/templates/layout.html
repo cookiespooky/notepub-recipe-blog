@@ -5,13 +5,43 @@
   {{- $pageURL := .Canonical -}}
   {{- if not $pageURL }}{{- $pageURL = printf "%s/" .BaseURL -}}{{- end -}}
   {{- $siteName := "Demo Blog" -}}
-  {{- $ogImage := printf "%s/assets/notepub.svg" .BaseURL -}}
-  {{- $hasOGImage := false -}}
+  {{- $defaultOGImage := printf "%s/notepub.png" .AssetsBase -}}
+  {{- $metaOGImage := "" -}}
+  {{- $metaOGImageAlt := "" -}}
+  {{- $fmOverridesOGImage := false -}}
   {{- range .Meta.OpenGraph -}}
     {{- if eq .Key "og:image" -}}
-      {{- $ogImage = .Value -}}
-      {{- $hasOGImage = true -}}
+      {{- $metaOGImage = .Value -}}
     {{- end -}}
+    {{- if eq .Key "og:image:alt" -}}
+      {{- $metaOGImageAlt = .Value -}}
+    {{- end -}}
+  {{- end -}}
+  {{- with (index .FM "og_image") -}}
+    {{- if ne (printf "%v" .) "" -}}
+      {{- $fmOverridesOGImage = true -}}
+    {{- end -}}
+  {{- end -}}
+  {{- with (index .FM "opengraph") -}}
+    {{- with (index . "image") -}}
+      {{- if ne (printf "%v" .) "" -}}
+        {{- $fmOverridesOGImage = true -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- with (index .FM "og") -}}
+    {{- with (index . "image") -}}
+      {{- if ne (printf "%v" .) "" -}}
+        {{- $fmOverridesOGImage = true -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $resolvedOGImage := $defaultOGImage -}}
+  {{- if and (eq .Page.Type "article") (ne $metaOGImage "") -}}
+    {{- $resolvedOGImage = $metaOGImage -}}
+  {{- end -}}
+  {{- if and (ne .Page.Type "article") $fmOverridesOGImage (ne $metaOGImage "") -}}
+    {{- $resolvedOGImage = $metaOGImage -}}
   {{- end -}}
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -33,13 +63,16 @@
   {{- if .Page.Description }}
   <meta name="twitter:description" content="{{ .Page.Description }}" />
   {{- end }}
-  <meta name="twitter:image" content="{{ $ogImage }}" />
+  <meta name="twitter:image" content="{{ $resolvedOGImage }}" />
   {{- range .Meta.OpenGraph }}
+  {{- if and (ne .Key "og:image") (ne .Key "og:image:alt") }}
   <meta property="{{ .Key }}" content="{{ .Value }}" />
   {{- end }}
+  {{- end }}
   <meta property="og:site_name" content="{{ $siteName }}" />
-  {{- if not $hasOGImage }}
-  <meta property="og:image" content="{{ $ogImage }}" />
+  <meta property="og:image" content="{{ $resolvedOGImage }}" />
+  {{- if and (eq $resolvedOGImage $metaOGImage) (ne $metaOGImageAlt "") }}
+  <meta property="og:image:alt" content="{{ $metaOGImageAlt }}" />
   {{- end }}
   {{- if .Meta.JSONLD }}
   <script type="application/ld+json">{{ .Meta.JSONLD }}</script>

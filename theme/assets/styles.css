@@ -79,7 +79,7 @@ a:hover { text-decoration: underline; }
 .search-button:hover,
 .search-form button:hover {
   opacity: 1;
-  background: #eee;
+  background: var(--card);
   color: var(--ink);
 }
 
