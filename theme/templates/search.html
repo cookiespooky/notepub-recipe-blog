@@ -1,35 +1,55 @@
-<section class="page">
-  <p class="eyebrow">Search</p>
-  <h1>Search</h1>
-  <form class="search-form" action="{{ .BaseURL }}/search" method="get" data-search-page-form>
-    <input type="search" name="q" value="{{ .SearchQuery }}" placeholder="Search..." minlength="2" data-search-page-input />
-    <button type="submit">Search</button>
+<section class="section search-page">
+  <h1 class="section-title">Search</h1>
+  <form class="np-search-page-form" method="get" action="{{ .BaseURL }}/search">
+    <input type="search" name="q" value="{{ .SearchQuery }}" placeholder="Search documentation" autocomplete="off" />
   </form>
-  <div class="search-results" data-search-page-results>
-    {{- if .SearchItems }}
-    <ul>
-      {{- range .SearchItems }}
-      <li>
-        <a href="{{ $.BaseURL }}{{ .Path }}">{{ .Title }}</a>
-        {{- if .Snippet }}<p class="muted">{{ .Snippet }}</p>{{- end }}
-      </li>
+
+  <div class="np-search-status" aria-live="polite"></div>
+  <div class="np-search-results" role="listbox"></div>
+
+  {{- if .SearchQuery }}
+  <p class="np-search-summary">Query: {{ .SearchQuery }}</p>
+  {{- end }}
+
+  {{- if .SearchItems }}
+  <ul class="np-search-page-results">
+    {{- range .SearchItems }}
+    <li>
+      <a href="{{ printf "%s%s" $.BaseURL .Path }}">{{ .Title }}</a>
+      {{- if .Snippet }}
+      <p>{{ .Snippet }}</p>
       {{- end }}
-    </ul>
-    {{- else }}
-    <p class="muted">Type at least 2 characters.</p>
+    </li>
     {{- end }}
-  </div>
-  <noscript>
-    <p class="muted">JavaScript enhances search but is optional.</p>
-  </noscript>
+  </ul>
+  {{- else if .SearchQuery }}
+  <p class="np-search-empty">No results found.</p>
+  {{- end }}
+
+  {{- if .SearchNextCursor }}
+  <a class="np-search-more" href="{{ .BaseURL }}/search?q={{ .SearchQuery }}&cursor={{ .SearchNextCursor }}">Next page</a>
+  {{- end }}
 </section>
 <script>
-  (function() {
-    if (window.__npPersonalSearchPageLoader) return;
-    window.__npPersonalSearchPageLoader = true;
+(function() {
+  if (window.__notepubSearchPageLoader) return;
+  window.__notepubSearchPageLoader = true;
+  var input = document.querySelector('.np-search-page-form input[name="q"]');
+  if (!input) return;
+  var loaded = false;
+  function load() {
+    if (loaded) return;
+    loaded = true;
     var s = document.createElement('script');
     s.src = '{{ .AssetsBase }}/search-page.js';
     s.async = true;
-    document.body.appendChild(s);
-  })();
+    s.onload = function() {
+      if (window.NotepubSearchPage && window.NotepubSearchPage.init) {
+        window.NotepubSearchPage.init();
+      }
+    };
+    document.head.appendChild(s);
+  }
+  input.addEventListener('focus', load, { once: true });
+})();
 </script>
