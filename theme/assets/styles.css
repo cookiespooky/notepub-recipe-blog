@@ -293,6 +293,8 @@ a:hover { text-decoration: underline; }
 
 .np-search-results {
   margin-top: 8px;
+  display: grid;
+  gap: 10px;
 }
 
 .np-search-item {
@@ -393,10 +395,12 @@ a:hover { text-decoration: underline; }
   list-style: none;
   padding: 0;
   margin: 16px 0 0;
+  display: grid;
+  gap: 10px;
 }
 
 .np-search-page-results li {
-  margin-bottom: 10px;
+  margin: 0;
 }
 
 .np-search-page-results li:last-child {
@@ -782,8 +786,14 @@ a:hover { text-decoration: underline; }
 .prose ol,
 .prose li { font-size: 18px; }
 .prose a {
-  font-weight: 600;
-  color: #475569;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.prose a:hover {
+  text-decoration-thickness: 2px;
 }
 
 .prose a.is-external::after {
@@ -943,7 +953,7 @@ a:hover { text-decoration: underline; }
 }
 
 .icon-button:hover {
-  background: #eee;
+  background: var(--soft);
 }
 
 .icon-button svg,
