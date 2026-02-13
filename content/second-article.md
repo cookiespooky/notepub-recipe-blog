@@ -9,4 +9,7 @@ order: 2
 related:
   - "first-article"
 ---
+
+![[npcover.svg]]
+
 This article links back to [[first-article]] using both `related` and a wiki link.

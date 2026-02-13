@@ -11,7 +11,7 @@ related:
   - "second-article"
 ---
 
-![Placeholder image](/assets/placeholder.svg)
+![[npcover.svg]]
 
 This is a demo article with link examples.
 
